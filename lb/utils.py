@@ -2,6 +2,7 @@ from lb.models import Submission, User
 from random import randint
 import functools
 
+
 def get_leaderboard():
     """
     Get the current leaderboard
@@ -70,6 +71,7 @@ def get_leaderboard():
     # 方案3：调用 Django 的 API (俺不会了
     # ...
 
+
 def judge(content: str):
     """
     Convert submitted content to a main score and a list of sub scors
@@ -81,6 +83,22 @@ def judge(content: str):
     #  If `content` is invalid, raise an Exception so that it can be
     #  captured in the view function.
     #  You can define the calculation of main score arbitrarily.
+    try:
+        answer = {}
+        with open("ground_truth.txt") as ground_truth:
+            for a in str(ground_truth).splitlines()[1:]:
+                answer[a.split(',')[0]] = a.split(',')[1:]
 
-    subs = [randint(0, 100) for _ in range(3)]
-    return sum(subs), subs
+        all_correct = 0
+        correct_rate = [0, 0, 0]
+        for a in content.splitlines():
+            ls = a.split(',')
+            if answer[ls[0]][0] == ls[1] and answer[ls[0]][1] == ls[2] and answer[ls[0]][2] == ls[3]:
+                all_correct += 1
+            for num in range(3):
+                if answer[ls[0]][num] == ls[num + 1]:
+                    correct_rate[num] += 1 / 1000
+
+        return all_correct / 10, correct_rate
+    except:
+        return None
